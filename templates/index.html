@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real time chat</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.3/socket.io.min.js"></script>
+    <style>
+        /* Basic stile for the chat */
+        #messages { height: 300px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; }
+        input, button { width: 100%; padding: 10px; margin-top: 10px; }
+        #username-form { display: block; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <h2>Real time chat</h2>
+    <div id="username-form">
+        <input type="text" id="username" placeholder="Ingresa tu nombre...">
+        <button onclick="setUsername()">Unirse al chat</button>
+    </div>
+    
+    <div id="chat" style="display: none;">
+        <div id="messages"></div>
+        <input type="text" id="message" placeholder="Escribe un mensaje...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        const socket = io();
+        let username = '';
+
+        // Join the chat
+        function setUsername() {
+            username = document.getElementById('username').value;
+            if (username.trim() !== '') {
+                socket.emit('join', username);
+                document.getElementById('username-form').style.display = 'none';
+                document.getElementById('chat').style.display = 'block';
+            } else {
+                alert('Please, enter a name.');
+            }
+        }
+
+        // View messages in chat
+        socket.on('message', function(msg) {
+            const messageElement = document.createElement('div');
+            messageElement.textContent = msg;
+            document.getElementById('messages').appendChild(messageElement);
+        });
+
+        // Send message to the server
+        function sendMessage() {
+            const message = document.getElementById('message').value;
+            if (message.trim() !== '') {
+                socket.send(message);
+                document.getElementById('message').value = '';
+            }
+        }
+    </script>
+</body>
+</html>
